@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: exemplar
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: exemplar
+      app.kubernetes.io/name: exemplar
+      app.kubernetes.io/part-of: demo
+      app.kubernetes.io/version: 157f6a2b
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        sidecar.opentelemetry.io/inject: yap-otel-sidecar
+      labels:
+        app.kubernetes.io/component: exemplar
+        app.kubernetes.io/name: exemplar
+        app.kubernetes.io/part-of: demo
+        app.kubernetes.io/version: 157f6a2b
+    spec:
+      containers:
+      - env:
+        image: dh2wltsh.gra7.container-registry.ovh.net/provoly/exemplar
+        imagePullPolicy: Always
+        name: exemplar
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 300m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 300Mi
+      imagePullSecrets:
+      - name: regcred
